@@ -1,9 +1,10 @@
 import re
 
 def main():
+
     #read input from command line or file
     #USE SET INPUT STRING FOR NOW
-    input = "a*b*|bba*"
+    input = "a.b"
 
     #check if input is proper regex form
     #return if not
@@ -18,7 +19,7 @@ def main():
 
     #substitute out all modifier characters
     #to manually produce the language
-    char_language = re.sub("[|*()]", "", input)
+    char_language = re.sub("[|*()+.]", "", input)
     language = (list(set(char_language)))
     language.sort()
 
@@ -36,9 +37,12 @@ def main():
     final_start = parsed[2]
     final_accepts = parsed[3]
 
-    print("Final NFA Tuple:")
+    print("******************")
+    print("*Final NFA Tuple:*")
+    print("******************\n(")
     print("states: " + str(final_states) + "\nlanguage: " + str(language) + "\ntransition table: " + 
     str(final_transitions) + "\nstart state: " + str(final_start) + "\naccept states: " + str(final_accepts))
+    print(")")
     
 
 def parse_input(input):
@@ -52,7 +56,8 @@ def parse_input(input):
     accepts = []
     state_count = 0
     start = 0
-    union_starts = ()
+    union_starts = None
+
     #iterate over characters of input string
     print("Shows stack each pass:")
     for index in range(0, len(input)):
@@ -67,6 +72,12 @@ def parse_input(input):
 
             transitions.append((state_count-1, state_count-2, 'e'))
             transitions.append((state_count-2, state_count-1, 'e'))
+
+        elif input[index] == '+':
+            last_input = stack.pop()
+            stack.append(((last_input[0] + '+'), last_input[1]))
+
+            transitions.append((state_count-1, state_count-2, 'e'))
 
         #case {union}
         elif input[index] == '|':
@@ -84,19 +95,25 @@ def parse_input(input):
             states.append(state_count)
             
             #add to transition table
-            transitions.append((state_count-1, state_count, input[index]))
+            char_output = 'sigma' if input[index] == '.' else input[index]
+            transitions.append((state_count-1, state_count, char_output))
 
-            #concat makes new component
+            #{concatenate} new component to a previous expression
             if index>0 and input[index-1] != '|' and input != '(' and input != ')':
+
                 last_input = stack.pop()
                 stack.append(((last_input[0]+input[index]), last_input[1]))
+
                 transitions.append((state_count-2, state_count-1, 'e'))
+
                 accepts.remove(state_count-2)
                 accepts.append(state_count)
+                
+            #add newest component to the stack --> no concatenation
             else:
-            #add newest component to the stack
                 stack.append((input[index], state_count-1))
                 accepts.append(state_count)
+
             state_count += 1
             
         
