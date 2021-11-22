@@ -1,10 +1,17 @@
+
+#TODO make parens work
+#already have some cases to handle
+#can mostly ignore - only changes where e transitions go on '*'
+#put in the stack or not?
+
+
 import re
 
 def main():
 
     #read input from command line or file
     #USE SET INPUT STRING FOR NOW
-    input = "a.b"
+    input = "(ab)*"
 
     #check if input is proper regex form
     #return if not
@@ -49,7 +56,6 @@ def parse_input(input):
 
     #deal separately with: (, ), *, |, concat
     #transition component tuple: (start state, end state, transition character {e, a, b})
-
     states = []
     stack = []
     transitions = []
@@ -70,8 +76,9 @@ def parse_input(input):
             last_input = stack.pop()
             stack.append(((last_input[0] + '*'), last_input[1]))
 
-            transitions.append((state_count-1, state_count-2, 'e'))
-            transitions.append((state_count-2, state_count-1, 'e'))
+            #state_count-2 --> last_input[1]
+            transitions.append((state_count-1, last_input[1], 'e'))
+            transitions.append((last_input[1], state_count-1, 'e'))
 
         elif input[index] == '+':
             last_input = stack.pop()
@@ -88,25 +95,28 @@ def parse_input(input):
             union_starts = (last_input[1], state_count)
 
         #case {character}
-        else:
+        elif input[index] != '(' and input[index] != ')':
             #make new component (2 states) and update state count
+            #unless reading '()' --> ignore
             states.append(state_count)
             state_count += 1
             states.append(state_count)
             
             #add to transition table
+            #substitute sigma for sigma transition character
             char_output = 'sigma' if input[index] == '.' else input[index]
             transitions.append((state_count-1, state_count, char_output))
 
             #{concatenate} new component to a previous expression
-            if index>0 and input[index-1] != '|' and input != '(' and input != ')':
+            if index>0 and input[index-1] != '|':
 
                 last_input = stack.pop()
                 stack.append(((last_input[0]+input[index]), last_input[1]))
 
-                transitions.append((state_count-2, state_count-1, 'e'))
+                if input[index-1] != '(' and input[index-1] != ')':
+                    transitions.append((state_count-2, state_count-1, 'e'))
+                    accepts.remove(state_count-2)
 
-                accepts.remove(state_count-2)
                 accepts.append(state_count)
                 
             #add newest component to the stack --> no concatenation
@@ -115,25 +125,31 @@ def parse_input(input):
                 accepts.append(state_count)
 
             state_count += 1
-            
+
+        #case {(}
+        elif input[index] == '(':
+            stack.append((input[index], state_count))
         
-    
-    if union_starts != None:
+        #BASE case {)}
+        else:
+            stack.append((stack.pop()[0], stack.pop()[1])
+            
+            
+    if union_starts is not None:
         #add new middle state to connect components
-            #update start
-            states.append(state_count)
+        #update start
+        states.append(state_count)
 
-            transitions.append((state_count, union_starts[0], 'e'))
-            transitions.append((state_count, union_starts[1], 'e'))
+        transitions.append((state_count, union_starts[0], 'e'))
+        transitions.append((state_count, union_starts[1], 'e'))
 
-            start = state_count
+        start = state_count
+        
 
     print(str(stack) + "\n--------------------------------------")
     
     return (states, transitions, start, accepts)
     
     
-    
-
 if __name__ == "__main__":
     main()
