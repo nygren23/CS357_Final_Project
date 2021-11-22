@@ -132,7 +132,8 @@ def parse_input(input):
         
         #BASE case {)}
         else:
-            stack.append((stack.pop()[0], stack.pop()[1])
+            last_input = stack.pop()
+            stack.append((last_input[0]+')', last_input[1]))
             
             
     if union_starts is not None:
