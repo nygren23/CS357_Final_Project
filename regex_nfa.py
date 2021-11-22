@@ -3,7 +3,7 @@ import re
 def main():
     #read input from command line or file
     #USE SET INPUT STRING FOR NOW
-    input = "a*b*|bba"
+    input = "a*b*|bba*"
 
     #check if input is proper regex form
     #return if not
@@ -15,9 +15,17 @@ def main():
 
     #initialize tuple values
     final_states = []
-    language = ['a', 'b']
+
+    #substitute out all modifier characters
+    #to manually produce the language
+    char_language = re.sub("[|*()]", "", input)
+    language = (list(set(char_language)))
+    language.sort()
+
     final_transitions = []
+
     final_start = 0
+
     final_accepts = []
 
     #print formal tuple
@@ -81,7 +89,7 @@ def parse_input(input):
             #concat makes new component
             if index>0 and input[index-1] != '|' and input != '(' and input != ')':
                 last_input = stack.pop()
-                stack.append(((str(last_input[0]) + str(input[index])), last_input[1]))
+                stack.append(((last_input[0]+input[index]), last_input[1]))
                 transitions.append((state_count-2, state_count-1, 'e'))
                 accepts.remove(state_count-2)
                 accepts.append(state_count)
