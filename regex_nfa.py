@@ -6,7 +6,7 @@ def main():
     #TEST CASES
     input = [
         "(a|b)|a", 
-        "a*b*(a)",
+        "a*b*a+a",
         "a|.*b+",
         "ab*(a*|b*)a*",
         "b*b(ba)b+"    
@@ -18,7 +18,7 @@ def main():
     
     #print formal tuple
     for single_input in input:
-            #check if input is proper regex form
+        #check if input is proper regex form
         #return if not
         try:
             re.compile(single_input)
