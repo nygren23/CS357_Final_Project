@@ -3,12 +3,19 @@ import re, sys
 
 def main():
 
-    #read input from command line or file
-    #USE SET INPUT STRING FOR NOW
-    input = ["(ba)*", "ba*", "(a|b)|a"]
+    #TEST CASES
+    input = [
+        "(a|b)|a", 
+        "a*b*(a)",
+        "a|.*b+",
+        "ab*(a*|b*)a*",
+        "b*b(ba)b+"    
+    ]
 
+    #stdout change
     original = sys.stdout
     sys.stdout = open('output.txt', 'w')
+    
     #print formal tuple
     for single_input in input:
             #check if input is proper regex form
@@ -39,8 +46,6 @@ def main():
         final_transitions = parsed[1]
         final_start = parsed[2]
         final_accepts = parsed[3]
-
-        #stdout change
         
         print("*********************")
         print("*Final NFA Tuple for: " + str(single_input))
@@ -140,7 +145,24 @@ def parse_input(input):
         #BASE case {)}
         else:
             last_input = stack.pop()
-            stack.append((last_input[0]+')', last_input[1]))
+            new_start = last_input[1]
+            
+            if union_starts is not None:
+                #add new middle state to connect components
+                #update start
+                states.append(state_count)
+
+                transitions.append((state_count, union_starts[0], 'e'))
+                transitions.append((state_count, union_starts[1], 'e'))
+
+                start = state_count 
+                new_start = state_count
+
+                state_count += 1
+
+                union_starts = None
+            
+            stack.append((last_input[0]+')', new_start))
             
             
     if union_starts is not None:
