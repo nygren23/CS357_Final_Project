@@ -1,56 +1,57 @@
 
-#TODO make parens work
-#already have some cases to handle
-#can mostly ignore - only changes where e transitions go on '*'
-#put in the stack or not?
-
-
-import re
+import re, sys
 
 def main():
 
     #read input from command line or file
     #USE SET INPUT STRING FOR NOW
-    input = "(ab)*"
+    input = ["(ba)*", "ba*", "(a|b)|a"]
 
-    #check if input is proper regex form
-    #return if not
-    try:
-        re.compile(input)
-    except re.error:
-        print("invalid input")
-        return -1
-
-    #initialize tuple values
-    final_states = []
-
-    #substitute out all modifier characters
-    #to manually produce the language
-    char_language = re.sub("[|*()+.]", "", input)
-    language = (list(set(char_language)))
-    language.sort()
-
-    final_transitions = []
-
-    final_start = 0
-
-    final_accepts = []
-
+    original = sys.stdout
+    sys.stdout = open('output.txt', 'w')
     #print formal tuple
-    parsed = parse_input(input)
+    for single_input in input:
+            #check if input is proper regex form
+        #return if not
+        try:
+            re.compile(single_input)
+        except re.error:
+            print("invalid input")
+            return -1
+            #initialize tuple values
+        final_states = []
 
-    final_states = parsed[0]
-    final_transitions = parsed[1]
-    final_start = parsed[2]
-    final_accepts = parsed[3]
+        #substitute out all modifier characters
+        #to manually produce the language
+        char_language = re.sub("[|*()+.]", "", single_input)
+        language = (list(set(char_language)))
+        language.sort()
 
-    print("******************")
-    print("*Final NFA Tuple:*")
-    print("******************\n(")
-    print("states: " + str(final_states) + "\nlanguage: " + str(language) + "\ntransition table: " + 
-    str(final_transitions) + "\nstart state: " + str(final_start) + "\naccept states: " + str(final_accepts))
-    print(")")
-    
+        final_transitions = []
+
+        final_start = 0
+
+        final_accepts = []
+
+        parsed = parse_input(single_input)
+
+        final_states = parsed[0]
+        final_transitions = parsed[1]
+        final_start = parsed[2]
+        final_accepts = parsed[3]
+
+        #stdout change
+        
+        print("*********************")
+        print("*Final NFA Tuple for: " + str(single_input))
+        print("*********************\n(")
+        print("states: " + str(final_states) + "\nlanguage: " + str(language) + "\ntransition table: " + 
+        str(final_transitions) + "\nstart state: " + str(final_start) + "\naccept states: " + str(final_accepts))
+        print(")")
+        print("\n$$$$$$$$$$$$$$$$$$$$$$$$$$\n")
+
+    #stdout change back
+    sys.stdout = original
 
 def parse_input(input):
 
@@ -65,26 +66,32 @@ def parse_input(input):
     union_starts = None
 
     #iterate over characters of input string
-    print("Shows stack each pass:")
+    #print("Shows stack each pass:")
     for index in range(0, len(input)):
-        print(stack)
+     #   print(stack)
         #if seeing a modifier, pop stack and apply modification to top of stack
         #if character, add new component
         
         #case {*}
+        #TODO handle whether in parens or not
         if input[index] == '*':
             last_input = stack.pop()
             stack.append(((last_input[0] + '*'), last_input[1]))
 
-            #state_count-2 --> last_input[1]
-            transitions.append((state_count-1, last_input[1], 'e'))
-            transitions.append((last_input[1], state_count-1, 'e'))
+            #state_count-2 if in not parens 
+            #last_input[1] if in parens
+            transition_to = state_count-2 if '(' not in last_input[0] else last_input[1]
+            transitions.append((state_count-1, transition_to, 'e'))
+            transitions.append((transition_to, state_count-1, 'e'))
 
+        #case {+}
+        #TODO handle whether in parens or not
         elif input[index] == '+':
             last_input = stack.pop()
             stack.append(((last_input[0] + '+'), last_input[1]))
 
-            transitions.append((state_count-1, state_count-2, 'e'))
+            transition_to = state_count-2 if '(' not in last_input[0] else last_input[1]
+            transitions.append((state_count-1, transition_to, 'e'))
 
         #case {union}
         elif input[index] == '|':
@@ -145,9 +152,6 @@ def parse_input(input):
         transitions.append((state_count, union_starts[1], 'e'))
 
         start = state_count
-        
-
-    print(str(stack) + "\n--------------------------------------")
     
     return (states, transitions, start, accepts)
     

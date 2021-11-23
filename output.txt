@@ -1,0 +1,39 @@
+**************************
+*Final NFA Tuple for: (ba)**
+**************************
+(
+states: [0, 1, 2, 3]
+language: ['a', 'b']
+transition table: [(0, 1, 'b'), (2, 3, 'a'), (1, 2, 'e'), (3, 0, 'e'), (0, 3, 'e')]
+start state: 0
+accept states: [3]
+)
+
+$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+**************************
+*Final NFA Tuple for: ba**
+**************************
+(
+states: [0, 1, 2, 3]
+language: ['a', 'b']
+transition table: [(0, 1, 'b'), (2, 3, 'a'), (1, 2, 'e'), (3, 2, 'e'), (2, 3, 'e')]
+start state: 0
+accept states: [3]
+)
+
+$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+**************************
+*Final NFA Tuple for: (a|b)|a*
+**************************
+(
+states: [0, 1, 2, 3, 4, 5, 6]
+language: ['a', 'b']
+transition table: [(0, 1, 'a'), (2, 3, 'b'), (4, 5, 'a'), (6, 2, 'e'), (6, 4, 'e')]
+start state: 6
+accept states: [1, 3, 5]
+)
+
+$$$$$$$$$$$$$$$$$$$$$$$$$$
+
